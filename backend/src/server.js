@@ -23,6 +23,7 @@ async function iniciarServidor() {
 
         console.error('❌ Error conectando a MySQL');
         console.error(error);
+        process.exit(1);
 
     }
 

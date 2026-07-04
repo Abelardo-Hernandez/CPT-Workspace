@@ -280,9 +280,24 @@ function marcarMenuActivo() {
     }
 }
 
+function actualizarFechaActual() {
+    const fechaActual = document.getElementById('fechaActual');
+
+    if (!fechaActual) {
+        return;
+    }
+
+    fechaActual.textContent = new Date().toLocaleDateString('es-MX', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric'
+    });
+}
+
 function inicializarMenu() {
     aplicarPermisosMenu();
     marcarMenuActivo();
+    actualizarFechaActual();
 }
 
 if (document.readyState === 'loading') {

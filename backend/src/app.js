@@ -15,7 +15,13 @@ const kpisRoutes = require('./routes/kpis.routes');
 
 const app = express();
 
-app.use(cors());
+const corsOrigin = process.env.CORS_ORIGIN;
+
+app.use(cors({
+    origin: corsOrigin
+        ? corsOrigin.split(',').map(origin => origin.trim())
+        : true
+}));
 app.use(express.json());
 
 app.use(
@@ -37,6 +43,13 @@ app.use('/api/kpis', kpisRoutes);
 
 app.get('/', (req, res) => {
     res.redirect('/login.html');
+});
+
+app.get('/health', (req, res) => {
+    res.json({
+        ok: true,
+        service: 'project-dashboard-ptc'
+    });
 });
 
 module.exports = app;

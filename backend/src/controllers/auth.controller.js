@@ -6,7 +6,6 @@ exports.login = async (req, res) => {
 
     try {
 
-        console.log('BODY:', req.body); //Validacion en consola
         const { usuario, password } = req.body;
 
         const [rows] = await pool.query(
