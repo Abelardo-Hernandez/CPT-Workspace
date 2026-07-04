@@ -48,7 +48,7 @@ app.get('/', (req, res) => {
 app.get('/health', (req, res) => {
     res.json({
         ok: true,
-        service: 'project-dashboard-ptc'
+        service: 'cpt-backend'
     });
 });
 

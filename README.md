@@ -16,9 +16,6 @@ backend/
     services/    Logica de negocio reutilizable
 docs/
   database/      Scripts o respaldos SQL de referencia
-archive/
-  legacy-frontend/ Frontend anterior conservado como referencia
-  dev/             Archivos de prueba o desarrollo no conectados a la app
 ```
 
 ## Ejecutar
@@ -31,3 +28,43 @@ npm start
 
 La app queda disponible en `http://127.0.0.1:3000`.
 
+## Despliegue
+
+El directorio que se debe desplegar es `backend/`.
+
+Variables requeridas:
+
+```text
+PORT
+DB_HOST
+DB_USER
+DB_PASSWORD
+DB_NAME
+DB_PORT
+JWT_SECRET
+CORS_ORIGIN
+```
+
+Usa `backend/.env.example` como plantilla. En produccion configura `JWT_SECRET` con un valor largo y privado.
+
+Antes de iniciar en un ambiente nuevo, crea la base de datos con:
+
+```bash
+mysql -u root -p < ../docs/database/01_schema.sql
+mysql -u root -p < ../docs/database/04_seed.sql
+```
+
+Cambia la contraseña inicial del usuario `admin` antes de usar la app en produccion.
+
+Comandos sugeridos en la plataforma:
+
+```bash
+npm install
+npm start
+```
+
+Health check:
+
+```text
+/health
+```
