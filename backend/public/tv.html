@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vista TV - Seguimiento de Proyectos</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link rel="stylesheet" href="css/tv.css">
+</head>
+
+<body>
+
+<div class="tv-shell">
+
+    <header class="tv-header">
+        <div class="brand-tv">
+            <div class="brand-badge">PTC</div>
+            <div>
+                <h1>Seguimiento de Proyectos</h1>
+                <p>Centro de monitoreo ejecutivo</p>
+            </div>
+        </div>
+
+        <div class="header-actions">
+
+    <div class="clock-box">
+
+        <strong id="horaTV">--:--:--</strong>
+        <span id="fechaTV">--</span>
+
+    </div>
+
+    <button class="btn-full" onclick="pantallaCompleta()">
+    <i class="bi bi-arrows-fullscreen"></i>
+</button>
+
+<button class="btn-exit" onclick="salirTV()">
+    <i class="bi bi-box-arrow-right"></i>
+</button>
+
+</div>
+    </header>
+
+    <section class="metric-strip">
+        <div class="strip-card">
+            <i class="bi bi-people-fill"></i>
+            <span>Usuarios</span>
+            <strong id="usuarios">0</strong>
+        </div>
+
+        <div class="strip-card">
+            <i class="bi bi-building-fill"></i>
+            <span>Áreas</span>
+            <strong id="areas">0</strong>
+        </div>
+
+        <div class="strip-card">
+            <i class="bi bi-folder-fill"></i>
+            <span>Proyectos</span>
+            <strong id="proyectos">0</strong>
+        </div>
+
+        <div class="strip-card">
+            <i class="bi bi-calendar-event-fill"></i>
+            <span>Reuniones</span>
+            <strong id="reuniones">0</strong>
+        </div>
+
+        <div class="strip-card global-mini">
+            <i class="bi bi-graph-up-arrow"></i>
+            <span>Avance global</span>
+            <strong id="avanceGlobalMini">0%</strong>
+        </div>
+    </section>
+
+    <main class="tv-dashboard">
+
+        <section class="panel panel-progress">
+            <div class="panel-title">
+                <i class="bi bi-speedometer2"></i>
+                Avance Global
+            </div>
+
+            <div class="progress-center">
+                <div id="avanceGlobal">0%</div>
+                <span>Promedio del último avance por proyecto</span>
+            </div>
+
+            <div class="progress-track">
+                <div id="barraGlobal" class="progress-fill progress-color-red"></div>
+            </div>
+        </section>
+
+        <section class="panel panel-meeting">
+            <div class="panel-title">
+                <i class="bi bi-calendar-check-fill"></i>
+                Próxima Reunión
+            </div>
+
+            <div id="proximaReunion" class="meeting-content"></div>
+        </section>
+
+        
+
+        <section class="panel panel-actions-chart">
+            <div class="panel-title">
+                <i class="bi bi-pie-chart-fill"></i>
+                Estado de Acciones
+            </div>
+
+            <div class="chart-holder">
+                <canvas id="graficaTVAcciones"></canvas>
+            </div>
+        </section>
+
+        <section class="panel panel-project-chart">
+            <div class="panel-title">
+                <i class="bi bi-pie-chart-fill"></i>
+                Estado de Proyectos
+            </div>
+
+            <div class="chart-holder">
+                <canvas id="graficaTVProyectos"></canvas>
+            </div>
+        </section>
+
+        <section class="panel panel-upcoming">
+            <div class="panel-title">
+                <i class="bi bi-list-task"></i>
+                Próximas Acciones
+            </div>
+
+            <div id="proximasAccionesTV" class="tv-list"></div>
+        </section>
+
+        <section class="panel panel-overdue">
+            <div class="panel-title danger-title">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                Acciones Vencidas
+            </div>
+
+            <div id="accionesVencidasTV" class="tv-list danger-list"></div>
+        </section>
+
+    </main>
+
+    <footer class="tv-footer">
+        <span>
+            <i class="bi bi-arrow-repeat"></i>
+            Actualización automática cada 30 segundos
+        </span>
+
+        <span>
+            Última actualización:
+            <strong id="ultimaActualizacion">--:--:--</strong>
+        </span>
+    </footer>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="js/main.js"></script>
+<script src="js/tv.js"></script>
+
+</body>
+</html>

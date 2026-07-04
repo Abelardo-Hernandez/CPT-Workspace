@@ -1,0 +1,463 @@
+.ptc-brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:28px;
+}
+
+.ptc-brand-icon{
+    width:44px;
+    height:44px;
+    border-radius:14px;
+    background:white;
+    color:var(--ptc-primary);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:22px;
+}
+
+.ptc-sidebar a{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    color:#dbeafe;
+    text-decoration:none;
+    padding:12px 14px;
+    border-radius:12px;
+    margin-bottom:8px;
+    font-weight:600;
+}
+
+.ptc-sidebar a:hover,
+.ptc-sidebar a.active{
+    background:linear-gradient(90deg,var(--ptc-primary),var(--ptc-primary-dark));
+    color:white;
+}
+
+.ptc-card{
+    background:white;
+    border-radius:20px;
+    border:1px solid var(--ptc-border);
+    box-shadow:0 8px 22px rgba(15,23,42,.08);
+    padding:22px;
+}
+
+.ptc-card-title{
+    font-weight:900;
+    margin-bottom:16px;
+}
+
+.ptc-tabs{
+    display:flex;
+    gap:10px;
+    background:white;
+    border-radius:18px;
+    padding:10px;
+    box-shadow:0 6px 18px rgba(15,23,42,.06);
+}
+
+.ptc-tab{
+    border:none;
+    background:#eef2f7;
+    padding:12px 18px;
+    border-radius:14px;
+    font-weight:800;
+    color:#334155;
+}
+
+.ptc-tab.active{
+    background:linear-gradient(90deg,var(--ptc-primary),var(--ptc-primary-dark));
+    color:white;
+}
+
+.ptc-badge{
+    padding:6px 10px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:900;
+}
+
+.ptc-badge.green{background:#dcfce7;color:#166534;}
+.ptc-badge.yellow{background:#fef3c7;color:#92400e;}
+.ptc-badge.red{background:#fee2e2;color:#991b1b;}
+.ptc-badge.blue{background:#dbeafe;color:#1e40af;}
+
+.ptc-progress{
+    height:18px;
+    background:#e5e7eb;
+    border-radius:999px;
+    overflow:hidden;
+}
+
+.ptc-progress-fill{
+    height:100%;
+    background:linear-gradient(90deg,var(--ptc-green),#22c55e);
+    border-radius:999px;
+    transition:width .35s ease, background .25s ease;
+}
+
+.progress-color-red{
+    background:linear-gradient(90deg,#dc2626,#ef4444) !important;
+}
+
+.progress-color-yellow{
+    background:linear-gradient(90deg,#f59e0b,#facc15) !important;
+}
+
+.progress-color-green{
+    background:linear-gradient(90deg,#16a34a,#22c55e) !important;
+}
+
+.progress-color-blue{
+    background:linear-gradient(90deg,#0d6efd,#38bdf8) !important;
+}
+
+.ptc-floating-action{
+    position:fixed;
+    right:28px;
+    bottom:28px;
+    width:56px;
+    height:56px;
+    border:0;
+    border-radius:50%;
+    background:var(--ptc-primary);
+    color:white;
+    box-shadow:0 12px 28px rgba(13,110,253,.35);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:24px;
+    z-index:20;
+}
+
+.ptc-modal{
+    position:fixed;
+    inset:0;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    z-index:40;
+}
+
+.ptc-modal.show{
+    display:flex;
+}
+
+.ptc-modal-backdrop{
+    position:absolute;
+    inset:0;
+    background:rgba(15,23,42,.55);
+}
+
+.ptc-modal-panel{
+    position:relative;
+    width:min(860px,100%);
+    max-height:calc(100vh - 48px);
+    overflow:auto;
+    background:white;
+    border-radius:18px;
+    box-shadow:0 24px 70px rgba(15,23,42,.3);
+    padding:24px;
+}
+
+.ptc-modal-header{
+    display:flex;
+    justify-content:space-between;
+    gap:16px;
+    margin-bottom:20px;
+}
+
+.ptc-modal-header h5{
+    margin:0;
+    font-weight:900;
+}
+
+.ptc-modal-header p{
+    margin:4px 0 0;
+    color:#64748b;
+}
+
+.ptc-modal-actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+    margin-top:20px;
+}
+
+.ptc-modal-actions-between{
+    justify-content:space-between;
+    align-items:center;
+}
+
+.acciones-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:18px;
+}
+
+.accion-card{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    min-height:210px;
+    padding:18px;
+    background:#ffffff;
+    border:1px solid var(--ptc-border);
+    border-left:6px solid var(--ptc-primary);
+    border-radius:14px;
+    box-shadow:0 8px 20px rgba(15,23,42,.07);
+}
+
+.accion-pendiente{
+    border-left-color:var(--ptc-yellow);
+}
+
+.accion-proceso{
+    border-left-color:var(--ptc-primary);
+}
+
+.accion-terminada{
+    border-left-color:var(--ptc-green);
+}
+
+.accion-vencida{
+    border-left-color:var(--ptc-red);
+}
+
+.accion-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+}
+
+.accion-status,
+.accion-priority{
+    display:inline-flex;
+    align-items:center;
+    min-height:28px;
+    padding:5px 10px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:900;
+    text-transform:uppercase;
+}
+
+.accion-status{
+    background:#e0f2fe;
+    color:#075985;
+}
+
+.accion-pendiente .accion-status{
+    background:#fef3c7;
+    color:#92400e;
+}
+
+.accion-proceso .accion-status{
+    background:#dbeafe;
+    color:#1e40af;
+}
+
+.accion-terminada .accion-status{
+    background:#dcfce7;
+    color:#166534;
+}
+
+.accion-vencida .accion-status{
+    background:#fee2e2;
+    color:#991b1b;
+}
+
+.accion-priority{
+    background:#f1f5f9;
+    color:#334155;
+}
+
+.accion-description{
+    flex:1;
+    margin:0;
+    color:#0f172a;
+    font-size:15px;
+    line-height:1.5;
+}
+
+.accion-meta{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:12px;
+}
+
+.accion-meta-item{
+    min-width:0;
+    padding:12px;
+    background:#f8fafc;
+    border:1px solid #eef2f7;
+    border-radius:10px;
+}
+
+.accion-meta-item small{
+    display:block;
+    margin-bottom:4px;
+    color:#64748b;
+    font-size:11px;
+    font-weight:800;
+    text-transform:uppercase;
+}
+
+.accion-meta-item b{
+    display:block;
+    color:#0f172a;
+    font-size:14px;
+    overflow-wrap:anywhere;
+}
+
+.accion-footer{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding-top:12px;
+    border-top:1px solid #eef2f7;
+    color:#475569;
+    font-size:13px;
+    font-weight:800;
+}
+
+@media (max-width: 768px){
+    .ptc-layout{
+        display:block;
+    }
+
+    .ptc-sidebar,
+    .ptc-layout .sidebar{
+        width:100%;
+        min-width:0;
+        height:auto;
+        position:relative;
+        padding:14px 12px;
+    }
+
+    .ptc-content{
+        padding:16px;
+    }
+
+    .ptc-page-header{
+        align-items:flex-start;
+        flex-direction:column;
+        gap:14px;
+        border-radius:16px;
+        padding:18px;
+    }
+
+    .ptc-page-header h1{
+        font-size:28px;
+    }
+
+    .ptc-page-header .btn{
+        width:100%;
+        justify-content:center;
+    }
+
+    .ptc-card{
+        padding:16px;
+        border-radius:14px;
+    }
+
+    .ptc-tabs{
+        overflow-x:auto;
+        border-radius:14px;
+        padding:8px;
+        scroll-snap-type:x proximity;
+    }
+
+    .ptc-tab{
+        flex:0 0 auto;
+        min-height:42px;
+        padding:10px 14px;
+        white-space:nowrap;
+        scroll-snap-align:start;
+    }
+
+    .table{
+        min-width:700px;
+    }
+
+    .table th,
+    .table td{
+        white-space:nowrap;
+    }
+
+    .table td:first-child{
+        white-space:normal;
+        min-width:190px;
+    }
+
+    .ptc-floating-action{
+        right:16px;
+        bottom:16px;
+        width:52px;
+        height:52px;
+        z-index:30;
+    }
+
+    .ptc-modal{
+        align-items:flex-end;
+        padding:12px;
+    }
+
+    .ptc-modal-panel{
+        width:100%;
+        max-height:calc(100vh - 24px);
+        border-radius:16px;
+        padding:18px;
+    }
+
+    .ptc-modal-header{
+        align-items:flex-start;
+    }
+
+    .ptc-modal-actions{
+        align-items:stretch;
+        flex-direction:column-reverse;
+    }
+
+    .ptc-modal-actions .btn{
+        width:100%;
+    }
+
+    .ptc-modal-actions-between{
+        align-items:stretch;
+        flex-direction:column-reverse;
+    }
+
+    .acciones-grid{
+        grid-template-columns:1fr;
+    }
+
+    .accion-card{
+        min-height:0;
+    }
+
+    .accion-meta{
+        grid-template-columns:1fr;
+    }
+}
+
+@media (max-width: 520px){
+    .ptc-content{
+        padding:12px;
+    }
+
+    .ptc-page-header h1{
+        font-size:24px;
+    }
+
+    .ptc-page-header p{
+        font-size:14px;
+    }
+
+    .ptc-card-title{
+        font-size:17px;
+    }
+}

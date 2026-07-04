@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Detalle del Proyecto</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link rel="stylesheet" href="css/dashboard.css">
+<link rel="stylesheet" href="css/ptc-ui.css">
+</head>
+
+<body>
+<div class="ptc-layout">
+
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-icon">
+                <i class="bi bi-bar-chart-line-fill"></i>
+            </div>
+            <div>
+                <h4>Seguimiento</h4>
+                <span>de Proyectos</span>
+            </div>
+        </div>
+
+        <p class="menu-title">Navegación</p>
+
+        <a id="menuDashboard" href="dashboard.html">
+            <i class="bi bi-house-door-fill"></i> Dashboard
+        </a>
+        <a id="menuProyectos" href="proyectos.html">
+            <i class="bi bi-folder-fill"></i> Proyectos
+        </a>
+        <a id="menuKpis" href="kpis.html">
+            <i class="bi bi-graph-up"></i> KPIs
+        </a>
+        <a id="menuReuniones" href="reuniones.html">
+            <i class="bi bi-calendar-event-fill"></i> Reuniones
+        </a>
+        <a id="menuAreas" href="areas.html">
+            <i class="bi bi-building-fill"></i> Áreas
+        </a>
+        <a id="menuUsuarios" href="usuarios.html">
+            <i class="bi bi-people-fill"></i> Usuarios
+        </a>
+        <a class="logout" href="#" onclick="logout()">
+            <i class="bi bi-box-arrow-left"></i> Salir
+        </a>
+    </aside>
+
+    <main class="ptc-content">
+
+        <header class="ptc-page-header">
+            <div>
+                <h1 id="nombreProyecto">Proyecto</h1>
+                <p id="objetivoProyecto">Detalle ejecutivo del proyecto</p>
+            </div>
+
+            <a href="proyectos.html" class="btn btn-light fw-bold">
+                <i class="bi bi-arrow-left"></i> Regresar
+            </a>
+        </header>
+
+        <section class="row mt-4 g-4">
+
+            <div class="col-md-8">
+                <div class="ptc-card">
+                    <h5 class="ptc-card-title">Resumen ejecutivo</h5>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Área:</strong> <span id="areaProyecto">-</span></p>
+                            <p><strong>Responsable:</strong> <span id="responsableProyecto">-</span></p>
+                            <p><strong>Inicio:</strong> <span id="fechaInicio">-</span></p>
+                        </div>
+
+                        <div class="col-md-6">
+                            <p><strong>Fecha objetivo:</strong> <span id="fechaObjetivo">-</span></p>
+                            <p><strong>Estatus:</strong> <span id="estatusProyecto" class="ptc-badge blue">-</span></p>
+                            <p><strong>Última actualización:</strong> <span id="ultimaActualizacion">-</span></p>
+                        </div>
+                    </div>
+
+                    <div class="mt-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <strong>Avance del proyecto</strong>
+                            <strong id="avanceTexto">0%</strong>
+                        </div>
+
+                        <div class="ptc-progress">
+                            <div id="barraAvance" class="ptc-progress-fill progress-color-red" style="width:0%;"></div>
+                        </div>
+                    </div>
+
+                    <p class="mt-3 mb-0">
+                        <strong>Último comentario:</strong>
+                        <span id="ultimoComentario">Sin comentarios</span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="ptc-card">
+                    <h5 class="ptc-card-title">Indicadores rápidos</h5>
+
+                    <p><strong>Reuniones asociadas:</strong> <span id="totalReuniones">0</span></p>
+                    <p><strong>Acciones registradas:</strong> <span id="totalAcciones">0</span></p>
+                    <p><strong>Avance actual:</strong> <span id="avanceMini">0%</span></p>
+                </div>
+            </div>
+        </section>
+
+        <section class="ptc-tabs mt-4">
+            <button
+                class="ptc-tab active"
+                type="button"
+                data-tab="timeline"
+                onclick="mostrarTabProyecto('timeline')"
+            >
+                <i class="bi bi-clock-history"></i> Timeline
+            </button>
+
+            <button
+                class="ptc-tab"
+                type="button"
+                data-tab="acciones"
+                onclick="mostrarTabProyecto('acciones')"
+            >
+                <i class="bi bi-check2-square"></i> Acciones
+            </button>
+
+            <button
+                class="ptc-tab"
+                type="button"
+                data-tab="proyecto"
+                onclick="mostrarTabProyecto('proyecto')"
+            >
+                <i class="bi bi-folder2-open"></i> Proyecto
+            </button>
+        </section>
+        <section class="ptc-card mt-4" data-project-tab-panel="acciones" style="display:none;">
+
+            <div class="d-flex justify-content-between align-items-center gap-3 mb-3 flex-wrap">
+                <h5 class="ptc-card-title mb-0">Acciones del proyecto</h5>
+
+                <button class="btn btn-primary fw-bold" type="button" onclick="abrirModalAccion()">
+                    <i class="bi bi-plus-lg"></i> Agregar acción
+                </button>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Acción</th>
+                            <th>Reunión</th>
+                            <th>Responsable</th>
+                            <th>Compromiso</th>
+                            <th>Prioridad</th>
+                            <th>Estatus</th>
+                            <th>Editar</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="tablaAccionesProyecto"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="ptc-card mt-4" data-project-tab-panel="proyecto" style="display:none;">
+            <div class="d-flex justify-content-between align-items-center gap-3 mb-3 flex-wrap">
+                <h5 class="ptc-card-title mb-0">KPIs del proyecto</h5>
+
+                <button class="btn btn-primary fw-bold" type="button" onclick="abrirModalKpiProyecto()">
+                    <i class="bi bi-plus-lg"></i> Agregar KPI
+                </button>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>KPI</th>
+                            <th>Meta</th>
+                            <th>Actual</th>
+                            <th>Resultado</th>
+                            <th>Tendencia</th>
+                            <th>Editar</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="tablaKpisProyecto"></tbody>
+                </table>
+            </div>
+
+            <div class="d-flex justify-content-end mt-3">
+                <button class="btn btn-outline-primary fw-bold" type="button" onclick="abrirModalNuevoKpiCatalogo()">
+                    <i class="bi bi-plus-lg"></i> Nuevo KPI
+                </button>
+            </div>
+        </section>
+
+        <section class="ptc-card mt-4" data-project-tab-panel="timeline">
+            <h5 class="ptc-card-title">Timeline del proyecto</h5>
+            <div id="timelineProyecto"></div>
+        </section>
+
+    </main>
+</div>
+
+<button class="ptc-floating-action" type="button" onclick="abrirModalAccion()" aria-label="Agregar acción">
+    <i class="bi bi-plus-lg"></i>
+</button>
+
+<div id="modalKpiProyecto" class="ptc-modal" aria-hidden="true">
+    <div class="ptc-modal-backdrop" onclick="cerrarModalKpiProyecto()"></div>
+
+    <section class="ptc-modal-panel" role="dialog" aria-modal="true" aria-labelledby="tituloModalKpiProyecto">
+        <div class="ptc-modal-header">
+            <div>
+                <h5 id="tituloModalKpiProyecto">Nuevo KPI del proyecto</h5>
+                <p>Registra la meta y el avance actual para este proyecto.</p>
+            </div>
+
+            <button class="btn btn-light btn-sm" type="button" onclick="cerrarModalKpiProyecto()" aria-label="Cerrar">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label fw-bold">KPI</label>
+                <select id="kpi_id" class="form-select"></select>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Meta</label>
+                <input id="kpi_meta" type="number" step="0.01" class="form-control">
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Actual</label>
+                <input id="kpi_actual" type="number" step="0.01" class="form-control">
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label fw-bold">Tendencia</label>
+                <select id="kpi_tendencia" class="form-select">
+                    <option value="sube">Sube</option>
+                    <option value="baja">Baja</option>
+                    <option value="igual" selected>Igual</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="ptc-modal-actions">
+            <button class="btn btn-light fw-bold" type="button" onclick="cerrarModalKpiProyecto()">Cancelar</button>
+            <button class="btn btn-primary fw-bold" type="button" onclick="crearKpiProyecto()">Guardar KPI</button>
+        </div>
+    </section>
+</div>
+
+<div id="modalNuevoKpiCatalogo" class="ptc-modal" aria-hidden="true">
+    <div class="ptc-modal-backdrop" onclick="cerrarModalNuevoKpiCatalogo()"></div>
+
+    <section class="ptc-modal-panel" role="dialog" aria-modal="true" aria-labelledby="tituloModalNuevoKpiCatalogo">
+        <div class="ptc-modal-header">
+            <div>
+                <h5 id="tituloModalNuevoKpiCatalogo">Nuevo KPI</h5>
+                <p>Registra un KPI en el catalogo para usarlo en este proyecto.</p>
+            </div>
+
+            <button class="btn btn-light btn-sm" type="button" onclick="cerrarModalNuevoKpiCatalogo()" aria-label="Cerrar">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label fw-bold">Nombre KPI</label>
+                <input id="nuevo_kpi_nombre" class="form-control" placeholder="Ejemplo: Calidad">
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label fw-bold">Unidad</label>
+                <input id="nuevo_kpi_unidad" class="form-control" placeholder="%">
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Tipo de meta</label>
+                <select id="nuevo_kpi_tipo_meta" class="form-select">
+                    <option value="mayor_es_mejor">Mayor es mejor</option>
+                    <option value="menor_es_mejor">Menor es mejor</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="ptc-modal-actions">
+            <button class="btn btn-light fw-bold" type="button" onclick="cerrarModalNuevoKpiCatalogo()">Cancelar</button>
+            <button class="btn btn-primary fw-bold" type="button" onclick="crearKpiCatalogoProyecto()">Guardar KPI</button>
+        </div>
+    </section>
+</div>
+
+<div id="modalEditarKpiProyecto" class="ptc-modal" aria-hidden="true">
+    <div class="ptc-modal-backdrop" onclick="cerrarModalEditarKpiProyecto()"></div>
+
+    <section class="ptc-modal-panel" role="dialog" aria-modal="true" aria-labelledby="tituloModalEditarKpiProyecto">
+        <div class="ptc-modal-header">
+            <div>
+                <h5 id="tituloModalEditarKpiProyecto">Editar KPI del proyecto</h5>
+                <p>Actualiza el avance registrado de este KPI.</p>
+            </div>
+
+            <button class="btn btn-light btn-sm" type="button" onclick="cerrarModalEditarKpiProyecto()" aria-label="Cerrar">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <input id="editar_kpi_resultado_id" type="hidden">
+
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label fw-bold">KPI</label>
+                <select id="editar_kpi_id" class="form-select"></select>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Meta</label>
+                <input id="editar_kpi_meta" type="number" step="0.01" class="form-control">
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Actual</label>
+                <input id="editar_kpi_actual" type="number" step="0.01" class="form-control">
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label fw-bold">Tendencia</label>
+                <select id="editar_kpi_tendencia" class="form-select">
+                    <option value="sube">Sube</option>
+                    <option value="baja">Baja</option>
+                    <option value="igual">Igual</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="ptc-modal-actions ptc-modal-actions-between">
+            <button class="btn btn-danger fw-bold" type="button" onclick="eliminarKpiProyecto()">
+                <i class="bi bi-trash3"></i> Eliminar KPI
+            </button>
+
+            <div class="d-flex gap-2">
+                <button class="btn btn-light fw-bold" type="button" onclick="cerrarModalEditarKpiProyecto()">Cancelar</button>
+                <button class="btn btn-primary fw-bold" type="button" onclick="actualizarKpiProyecto()">Guardar cambios</button>
+            </div>
+        </div>
+    </section>
+</div>
+
+<div id="modalAccion" class="ptc-modal" aria-hidden="true">
+    <div class="ptc-modal-backdrop" onclick="cerrarModalAccion()"></div>
+
+    <section class="ptc-modal-panel" role="dialog" aria-modal="true" aria-labelledby="tituloModalAccion">
+        <div class="ptc-modal-header">
+            <div>
+                <h5 id="tituloModalAccion">Nueva acción</h5>
+                <p>Se guardará dentro de este proyecto.</p>
+            </div>
+
+            <button class="btn btn-light btn-sm" type="button" onclick="cerrarModalAccion()" aria-label="Cerrar">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label fw-bold">Reunión</label>
+                <select id="reunion_id" class="form-select"></select>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold">Responsable</label>
+                <select id="responsable_usuario_id" class="form-select"></select>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold">Fecha compromiso</label>
+                <input id="fecha_compromiso" type="date" class="form-control">
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Prioridad</label>
+                <select id="prioridad" class="form-select">
+                    <option value="alta">Alta</option>
+                    <option value="media" selected>Media</option>
+                    <option value="baja">Baja</option>
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Estatus</label>
+                <select id="estatus" class="form-select">
+                    <option value="pendiente">Pendiente</option>
+                    <option value="en_proceso">En proceso</option>
+                    <option value="terminada">Terminada</option>
+                    <option value="vencida">Vencida</option>
+                </select>
+            </div>
+
+            <div class="col-12">
+                <label class="form-label fw-bold">Descripción</label>
+                <textarea id="descripcion" class="form-control" rows="4" placeholder="Describe la acción o compromiso"></textarea>
+            </div>
+        </div>
+
+        <div class="ptc-modal-actions">
+            <button class="btn btn-light fw-bold" type="button" onclick="cerrarModalAccion()">Cancelar</button>
+            <button class="btn btn-primary fw-bold" type="button" onclick="crearAccionProyecto()">
+                Guardar acción
+            </button>
+        </div>
+    </section>
+</div>
+
+<div id="modalEditarAccion" class="ptc-modal" aria-hidden="true">
+    <div class="ptc-modal-backdrop" onclick="cerrarModalEditarAccion()"></div>
+
+    <section class="ptc-modal-panel" role="dialog" aria-modal="true" aria-labelledby="tituloModalEditarAccion">
+        <div class="ptc-modal-header">
+            <div>
+                <h5 id="tituloModalEditarAccion">Editar acción</h5>
+                <p>Actualiza los datos de seguimiento de esta acción.</p>
+            </div>
+
+            <button class="btn btn-light btn-sm" type="button" onclick="cerrarModalEditarAccion()" aria-label="Cerrar">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <input id="editar_accion_id" type="hidden">
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label fw-bold">Reunión</label>
+                <select id="editar_reunion_id" class="form-select"></select>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold">Responsable</label>
+                <select id="editar_responsable_usuario_id" class="form-select"></select>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold">Fecha compromiso</label>
+                <input id="editar_fecha_compromiso" type="date" class="form-control">
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Prioridad</label>
+                <select id="editar_prioridad" class="form-select">
+                    <option value="alta">Alta</option>
+                    <option value="media">Media</option>
+                    <option value="baja">Baja</option>
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Estatus</label>
+                <select id="editar_estatus" class="form-select">
+                    <option value="pendiente">Pendiente</option>
+                    <option value="en_proceso">En proceso</option>
+                    <option value="terminada">Terminada</option>
+                    <option value="vencida">Vencida</option>
+                </select>
+            </div>
+
+            <div class="col-12">
+                <label class="form-label fw-bold">Descripción</label>
+                <textarea id="editar_descripcion" class="form-control" rows="4" placeholder="Describe la acción o compromiso"></textarea>
+            </div>
+        </div>
+
+        <div class="ptc-modal-actions ptc-modal-actions-between">
+            <button class="btn btn-danger fw-bold" type="button" onclick="eliminarAccionProyecto()">
+                <i class="bi bi-trash3"></i> Eliminar acción
+            </button>
+
+            <div class="d-flex gap-2">
+                <button class="btn btn-light fw-bold" type="button" onclick="cerrarModalEditarAccion()">Cancelar</button>
+                <button class="btn btn-primary fw-bold" type="button" onclick="actualizarAccionProyecto()">
+                    Guardar cambios
+                </button>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script src="js/auth.js"></script>
+<script src="js/main.js"></script>
+<script src="js/proyecto-detalle.js"></script>
+</body>
+</html>

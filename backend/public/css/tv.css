@@ -1,0 +1,597 @@
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    font-family:'Segoe UI', Arial, sans-serif;
+    background:#050b16;
+    color:white;
+    overflow:hidden;
+}
+
+.tv-shell{
+    width:100vw;
+    height:100vh;
+    padding:12px;
+    display:grid;
+    grid-template-rows:70px 74px 1fr 34px;
+    gap:10px;
+    background:
+        radial-gradient(circle at top left, rgba(14,165,233,.22), transparent 32%),
+        radial-gradient(circle at bottom right, rgba(34,197,94,.15), transparent 34%),
+        #050b16;
+}
+
+.tv-header{
+    background:linear-gradient(90deg,#071b3a,#0f766e,#2563eb);
+    border:1px solid rgba(255,255,255,.1);
+    border-radius:18px;
+    padding:10px 18px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    box-shadow:0 10px 25px rgba(0,0,0,.25);
+}
+
+.brand-tv{
+    display:flex;
+    align-items:center;
+    gap:14px;
+}
+
+.brand-badge{
+    width:62px;
+    height:46px;
+    border-radius:16px;
+    background:linear-gradient(135deg,#22c55e,#0ea5e9);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:24px;
+    font-weight:1000;
+}
+
+.brand-tv h1{
+    margin:0;
+    font-size:27px;
+    font-weight:1000;
+    text-transform:uppercase;
+    letter-spacing:.4px;
+}
+
+.brand-tv p{
+    margin:0;
+    color:#dbeafe;
+    font-size:13px;
+    font-weight:600;
+}
+
+.clock-box{
+    text-align:right;
+}
+
+.clock-box strong{
+    display:block;
+    font-size:30px;
+    line-height:1;
+    font-weight:1000;
+}
+
+.clock-box span{
+    display:block;
+    margin-top:4px;
+    color:#dbeafe;
+    font-size:13px;
+}
+
+.metric-strip{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:10px;
+}
+
+.strip-card{
+    background:rgba(15,23,42,.92);
+    border:1px solid rgba(56,189,248,.2);
+    border-radius:18px;
+    padding:10px 14px;
+    display:grid;
+    grid-template-columns:42px 1fr auto;
+    align-items:center;
+    gap:10px;
+    box-shadow:0 10px 22px rgba(0,0,0,.22);
+}
+
+.strip-card i{
+    width:42px;
+    height:42px;
+    border-radius:14px;
+    background:linear-gradient(135deg,#2563eb,#38bdf8);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:22px;
+}
+
+.strip-card span{
+    color:#b6c5dc;
+    font-size:12px;
+    font-weight:900;
+    text-transform:uppercase;
+}
+
+.strip-card strong{
+    font-size:28px;
+    font-weight:1000;
+}
+
+.global-mini i{
+    background:linear-gradient(135deg,#16a34a,#22c55e);
+}
+
+.tv-dashboard{
+    min-height:0;
+    display:grid;
+    grid-template-columns:1fr 1.12fr 1.05fr;
+    grid-template-rows:1fr 1fr 1fr;
+    gap:10px;
+    grid-template-areas:
+        "progress meeting projectChart"
+        "progress upcoming projectChart"
+        "overdue upcoming actionsChart";
+}
+
+.panel{
+    min-height:0;
+    background:rgba(15,23,42,.92);
+    border:1px solid rgba(56,189,248,.18);
+    border-radius:20px;
+    padding:14px;
+    box-shadow:0 12px 26px rgba(0,0,0,.28);
+    overflow:hidden;
+}
+
+.panel-title{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    color:#e0f2fe;
+    font-size:16px;
+    font-weight:1000;
+    text-transform:uppercase;
+    letter-spacing:.3px;
+    margin-bottom:10px;
+}
+
+.panel-title i{
+    color:#38bdf8;
+}
+
+.danger-title i{
+    color:#ef4444;
+}
+
+.panel-progress{
+    grid-area:progress;
+    background:
+        linear-gradient(135deg,rgba(22,163,74,.95),rgba(15,118,110,.92)),
+        #0f172a;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+}
+
+.panel-meeting{
+    grid-area:meeting;
+}
+
+.panel-project-chart{
+    grid-area:projectChart;
+}
+
+.panel-actions-chart{
+    grid-area:actionsChart;
+}
+
+.panel-upcoming{
+    grid-area:upcoming;
+}
+
+.panel-overdue{
+    grid-area:overdue;
+}
+
+.progress-center{
+    text-align:center;
+}
+
+#avanceGlobal{
+    font-size:78px;
+    line-height:1;
+    font-weight:1000;
+}
+
+.progress-center span{
+    display:block;
+    margin-top:8px;
+    color:#dcfce7;
+    font-size:14px;
+    font-weight:700;
+}
+
+.progress-track{
+    margin-top:18px;
+    height:18px;
+    width:100%;
+    background:rgba(255,255,255,.2);
+    border-radius:999px;
+    overflow:hidden;
+}
+
+.progress-fill{
+    width:0%;
+    height:100%;
+    background:linear-gradient(90deg,#ffffff,#bae6fd);
+    border-radius:999px;
+    transition:width .4s ease, background .25s ease;
+}
+
+.progress-color-red{
+    background:linear-gradient(90deg,#dc2626,#ef4444) !important;
+}
+
+.progress-color-yellow{
+    background:linear-gradient(90deg,#f59e0b,#facc15) !important;
+}
+
+.progress-color-green{
+    background:linear-gradient(90deg,#16a34a,#22c55e) !important;
+}
+
+.progress-color-blue{
+    background:linear-gradient(90deg,#0d6efd,#38bdf8) !important;
+}
+
+.meeting-content{
+    height:calc(100% - 34px);
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:flex-start;
+}
+
+.meeting-content h3{
+    margin:0;
+    font-size:48px;
+    font-weight:1000;
+    color:#38bdf8;
+}
+
+.meeting-content p{
+    margin:4px 0;
+    font-size:21px;
+    font-weight:800;
+    color:#e5e7eb;
+}
+
+.chart-holder{
+    height:calc(100% - 34px);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.chart-holder canvas{
+    width:100% !important;
+    height:100% !important;
+    max-height:100%;
+}
+
+.tv-list{
+    height:calc(100% - 34px);
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    overflow:hidden;
+}
+
+.list-item{
+    background:rgba(255,255,255,.07);
+    border-left:5px solid #38bdf8;
+    border-radius:12px;
+    padding:8px 10px;
+}
+
+.danger-list .list-item{
+    border-left-color:#ef4444;
+}
+
+.list-item strong{
+    display:block;
+    font-size:14px;
+    line-height:1.15;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.list-item span{
+    display:block;
+    margin-top:3px;
+    font-size:12px;
+    color:#cbd5e1;
+}
+
+.empty{
+    color:#94a3b8;
+    font-size:16px;
+    padding-top:12px;
+}
+
+.tv-footer{
+    background:rgba(15,23,42,.92);
+    border:1px solid rgba(56,189,248,.18);
+    border-radius:14px;
+    padding:0 16px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    color:#cbd5e1;
+    font-size:13px;
+}
+
+.tv-footer strong{
+    color:white;
+}
+
+@media(max-width:1400px){
+    .tv-shell{
+        grid-template-rows:62px 64px 1fr 30px;
+        gap:8px;
+        padding:8px;
+    }
+
+    .brand-badge{
+        width:54px;
+        height:40px;
+        font-size:20px;
+    }
+
+    .brand-tv h1{
+        font-size:22px;
+    }
+
+    .clock-box strong{
+        font-size:24px;
+    }
+
+    .strip-card{
+        padding:8px 10px;
+        grid-template-columns:36px 1fr auto;
+    }
+
+    .strip-card i{
+        width:36px;
+        height:36px;
+        font-size:18px;
+    }
+
+    .strip-card span{
+        font-size:10px;
+    }
+
+    .strip-card strong{
+        font-size:22px;
+    }
+
+    .panel{
+        padding:10px;
+        border-radius:16px;
+    }
+
+    .panel-title{
+        font-size:13px;
+        margin-bottom:6px;
+    }
+
+    #avanceGlobal{
+        font-size:58px;
+    }
+
+    .meeting-content h3{
+        font-size:36px;
+    }
+
+    .meeting-content p{
+        font-size:16px;
+    }
+
+    .list-item{
+        padding:6px 8px;
+    }
+
+    .list-item strong{
+        font-size:12px;
+    }
+
+    .list-item span{
+        font-size:10px;
+    }
+}
+
+.header-actions{
+
+    display:flex;
+    align-items:center;
+    gap:16px;
+
+}
+
+.btn-exit{
+
+    width:42px;
+    height:42px;
+
+    border:none;
+
+    border-radius:12px;
+
+    background:#dc2626;
+
+    color:white;
+
+    cursor:pointer;
+
+    font-size:18px;
+
+    transition:.25s;
+
+}
+
+.btn-exit:hover{
+
+    background:#ef4444;
+
+    transform:scale(1.08);
+
+}
+
+@media(max-width:900px){
+    body{
+        overflow:auto;
+    }
+
+    .tv-shell{
+        width:100%;
+        min-height:100vh;
+        height:auto;
+        grid-template-rows:auto auto 1fr auto;
+        padding:10px;
+    }
+
+    .tv-header{
+        align-items:flex-start;
+        flex-direction:column;
+        gap:12px;
+        border-radius:16px;
+    }
+
+    .brand-tv{
+        width:100%;
+    }
+
+    .brand-badge{
+        width:50px;
+        height:40px;
+        border-radius:14px;
+        font-size:18px;
+    }
+
+    .brand-tv h1{
+        font-size:20px;
+    }
+
+    .brand-tv p{
+        font-size:12px;
+    }
+
+    .header-actions{
+        width:100%;
+        justify-content:space-between;
+        gap:10px;
+    }
+
+    .clock-box{
+        text-align:left;
+    }
+
+    .clock-box strong{
+        font-size:24px;
+    }
+
+    .metric-strip{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+    }
+
+    .strip-card{
+        min-width:0;
+        grid-template-columns:38px 1fr;
+        grid-template-areas:
+            "icon label"
+            "icon value";
+        gap:2px 10px;
+        padding:10px;
+    }
+
+    .strip-card i{
+        grid-area:icon;
+        width:38px;
+        height:38px;
+        font-size:18px;
+    }
+
+    .strip-card span{
+        grid-area:label;
+    }
+
+    .strip-card strong{
+        grid-area:value;
+        font-size:22px;
+        line-height:1;
+    }
+
+    .tv-dashboard{
+        display:flex;
+        flex-direction:column;
+        min-height:0;
+    }
+
+    .panel{
+        min-height:220px;
+        border-radius:16px;
+    }
+
+    .panel-progress{
+        min-height:190px;
+    }
+
+    #avanceGlobal{
+        font-size:56px;
+    }
+
+    .meeting-content h3{
+        font-size:34px;
+    }
+
+    .meeting-content p{
+        font-size:17px;
+    }
+
+    .tv-list{
+        max-height:260px;
+        overflow:auto;
+    }
+
+    .tv-footer{
+        align-items:flex-start;
+        flex-direction:column;
+        gap:6px;
+        height:auto;
+        padding:10px 12px;
+    }
+}
+
+@media(max-width:520px){
+    .metric-strip{
+        grid-template-columns:1fr;
+    }
+
+    .panel{
+        min-height:200px;
+    }
+
+    .chart-holder{
+        min-height:170px;
+    }
+}
