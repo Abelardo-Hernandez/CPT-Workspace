@@ -4,6 +4,7 @@ const params = new URLSearchParams(window.location.search);
 const proyectoId = params.get('id');
 let accionesProyectoCache = [];
 let kpisProyectoCache = [];
+let graficaKpisProyecto = null;
 
 if (!proyectoId) {
     alert('No se recibió ID de proyecto');
@@ -127,6 +128,12 @@ function cerrarModalEditarAccion() {
 }
 
 function abrirModalKpiProyecto() {
+    const fechaInput = document.getElementById('kpi_fecha_medicion');
+
+    if (fechaInput && !fechaInput.value) {
+        fechaInput.value = fechaHoyInput();
+    }
+
     const modal = document.getElementById('modalKpiProyecto');
     modal.classList.add('show');
     modal.setAttribute('aria-hidden', 'false');
@@ -162,6 +169,7 @@ function abrirModalEditarKpiProyecto(id) {
     document.getElementById('editar_kpi_id').value = registro.kpi_id || '';
     document.getElementById('editar_kpi_meta').value = registro.meta ?? '';
     document.getElementById('editar_kpi_actual').value = registro.actual ?? '';
+    document.getElementById('editar_kpi_fecha_medicion').value = valorFechaInput(fechaKpi(registro));
     document.getElementById('editar_kpi_tendencia').value = registro.tendencia || 'igual';
 
     const modal = document.getElementById('modalEditarKpiProyecto');
@@ -189,6 +197,10 @@ function valorFechaInput(fecha) {
     if (Number.isNaN(date.getTime())) return '';
 
     return date.toISOString().slice(0, 10);
+}
+
+function fechaHoyInput() {
+    return new Date().toISOString().slice(0, 10);
 }
 
 async function cargarProyecto() {
@@ -383,6 +395,243 @@ function badgeResultadoKpi(resultado) {
     );
 }
 
+function porcentajeKpi(kpi) {
+    const meta = Number(kpi.meta);
+    const actual = Number(kpi.actual);
+
+    if (!Number.isFinite(meta) || !Number.isFinite(actual) || meta <= 0) {
+        return null;
+    }
+
+    if (kpi.tipo_meta === 'menor_es_mejor') {
+        if (actual <= meta) {
+            return 100;
+        }
+
+        return (meta / actual) * 100;
+    }
+
+    return (actual / meta) * 100;
+}
+
+function fechaKpi(kpi) {
+    return kpi.fecha_medicion || kpi.fecha_reunion || kpi.fecha_registro || null;
+}
+
+function timestampKpi(kpi) {
+    const fecha = fechaKpi(kpi);
+
+    if (!fecha) {
+        return null;
+    }
+
+    const partesFecha = String(fecha).match(/^(\d{4})-(\d{2})-(\d{2})/);
+
+    if (partesFecha) {
+        return new Date(
+            Number(partesFecha[1]),
+            Number(partesFecha[2]) - 1,
+            Number(partesFecha[3])
+        ).getTime();
+    }
+
+    const date = new Date(fecha);
+
+    if (Number.isNaN(date.getTime())) {
+        return null;
+    }
+
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+}
+
+function etiquetaTiempoKpi(kpi) {
+    const fecha = fechaKpi(kpi);
+
+    if (fecha) {
+        return formatearFecha(fecha);
+    }
+
+    return 'Sin fecha';
+}
+
+function formatearFechaGrafica(timestamp) {
+    if (!Number.isFinite(timestamp)) {
+        return '';
+    }
+
+    return new Intl.DateTimeFormat('es-MX', {
+        day: '2-digit',
+        month: 'short'
+    }).format(new Date(timestamp));
+}
+
+function colorGraficaKpi(indice) {
+    const colores = [
+        '#0d6efd',
+        '#198754',
+        '#dc3545',
+        '#f59e0b',
+        '#7c3aed',
+        '#0f766e',
+        '#db2777',
+        '#475569'
+    ];
+
+    return colores[indice % colores.length];
+}
+
+function renderGraficaKpisProyecto(kpis) {
+    const canvas = document.getElementById('graficaKpisProyecto');
+    const estadoVacio = document.getElementById('graficaKpisProyectoVacia');
+
+    if (!canvas || !estadoVacio) {
+        return;
+    }
+
+    if (graficaKpisProyecto) {
+        graficaKpisProyecto.destroy();
+        graficaKpisProyecto = null;
+    }
+
+    const puntos = kpis
+        .map((kpi, indice) => ({
+            ...kpi,
+            indice,
+            porcentaje: porcentajeKpi(kpi),
+            timestamp: timestampKpi(kpi)
+        }))
+        .filter(kpi => kpi.porcentaje !== null && kpi.timestamp !== null)
+        .sort((a, b) => a.timestamp - b.timestamp || a.id - b.id);
+
+    estadoVacio.style.display = puntos.length ? 'none' : 'flex';
+
+    if (!puntos.length || typeof Chart === 'undefined') {
+        return;
+    }
+
+    const kpisUnicos = [...new Set(puntos.map(kpi => kpi.kpi || 'KPI'))];
+    const maximoPorcentaje = Math.max(100, ...puntos.map(kpi => kpi.porcentaje));
+    const maximoEjeY = Math.min(160, Math.ceil(maximoPorcentaje / 20) * 20);
+    const diaMs = 24 * 60 * 60 * 1000;
+    const minTiempo = Math.min(...puntos.map(kpi => kpi.timestamp));
+    const maxTiempo = Math.max(...puntos.map(kpi => kpi.timestamp));
+    const rangoMin = minTiempo === maxTiempo ? minTiempo - diaMs : minTiempo;
+    const rangoMax = minTiempo === maxTiempo ? maxTiempo + diaMs : maxTiempo;
+
+    const datasets = kpisUnicos.map((nombreKpi, indiceKpi) => {
+        const color = colorGraficaKpi(indiceKpi);
+
+        return {
+            label: nombreKpi,
+            data: puntos
+                .map((kpi, indicePunto) => ({ kpi, indicePunto }))
+                .filter(item => (item.kpi.kpi || 'KPI') === nombreKpi)
+                .map(item => ({
+                    x: item.kpi.timestamp,
+                    y: Number(item.kpi.porcentaje.toFixed(2)),
+                    etiquetaTiempo: etiquetaTiempoKpi(item.kpi),
+                    meta: item.kpi.meta,
+                    actual: item.kpi.actual,
+                    unidad: item.kpi.unidad || '',
+                    resultado: item.kpi.resultado
+                })),
+            backgroundColor: color,
+            borderColor: color,
+            pointBackgroundColor: color,
+            pointBorderColor: '#ffffff',
+            pointBorderWidth: 2,
+            pointRadius: 6,
+            pointHoverRadius: 8,
+            showLine: false
+        };
+    });
+
+    graficaKpisProyecto = new Chart(canvas, {
+        type: 'scatter',
+        data: { datasets },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'nearest',
+                intersect: true
+            },
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        usePointStyle: true,
+                        boxWidth: 8,
+                        boxHeight: 8,
+                        font: {
+                            weight: '700'
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        title(items) {
+                            return items[0]?.raw?.etiquetaTiempo || 'Tiempo';
+                        },
+                        label(item) {
+                            const raw = item.raw;
+                            const unidad = raw.unidad ? ` ${raw.unidad}` : '';
+                            return `${item.dataset.label}: ${raw.y}% | Actual ${raw.actual}${unidad} / Meta ${raw.meta}${unidad}`;
+                        },
+                        afterLabel(item) {
+                            return `Resultado: ${textoEstatus(item.raw.resultado)}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    type: 'linear',
+                    min: rangoMin,
+                    max: rangoMax,
+                    title: {
+                        display: true,
+                        text: 'Tiempo',
+                        font: {
+                            weight: '800'
+                        }
+                    },
+                    ticks: {
+                        callback(value) {
+                            return formatearFechaGrafica(Number(value));
+                        },
+                        maxRotation: 0,
+                        autoSkip: true
+                    },
+                    grid: {
+                        color: '#e2e8f0'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    suggestedMax: maximoEjeY,
+                    title: {
+                        display: true,
+                        text: 'Porcentaje del KPI',
+                        font: {
+                            weight: '800'
+                        }
+                    },
+                    ticks: {
+                        callback(value) {
+                            return `${value}%`;
+                        }
+                    },
+                    grid: {
+                        color: context => context.tick.value === 100 ? '#16a34a' : '#e2e8f0',
+                        lineWidth: context => context.tick.value === 100 ? 2 : 1
+                    }
+                }
+            }
+        }
+    });
+}
+
 async function cargarKpisProyecto() {
     const res = await fetch(`/api/kpis/resultados/proyecto/${proyectoId}`, {
         headers: auth.headers()
@@ -390,6 +639,7 @@ async function cargarKpisProyecto() {
 
     const kpis = await res.json();
     kpisProyectoCache = kpis;
+    renderGraficaKpisProyecto(kpis);
 
     const tabla = document.getElementById('tablaKpisProyecto');
     tabla.innerHTML = '';
@@ -397,7 +647,7 @@ async function cargarKpisProyecto() {
     if (!kpis.length) {
         tabla.innerHTML = `
             <tr>
-                <td colspan="6">
+                <td colspan="7">
                     <div class="empty-state">
                         Este proyecto aun no tiene KPIs asignados.
                     </div>
@@ -416,6 +666,7 @@ async function cargarKpisProyecto() {
                 </td>
                 <td>${k.meta} ${k.unidad || ''}</td>
                 <td>${k.actual} ${k.unidad || ''}</td>
+                <td>${formatearFecha(fechaKpi(k))}</td>
                 <td>${badgeResultadoKpi(k.resultado)}</td>
                 <td>${textoTendencia(k.tendencia)}</td>
                 <td class="text-center">
@@ -566,6 +817,7 @@ async function crearKpiProyecto() {
         kpi_id: document.getElementById('kpi_id').value,
         meta: document.getElementById('kpi_meta').value,
         actual: document.getElementById('kpi_actual').value,
+        fecha_medicion: document.getElementById('kpi_fecha_medicion').value,
         tendencia: document.getElementById('kpi_tendencia').value
     };
 
@@ -585,6 +837,7 @@ async function crearKpiProyecto() {
     document.getElementById('kpi_id').value = '';
     document.getElementById('kpi_meta').value = '';
     document.getElementById('kpi_actual').value = '';
+    document.getElementById('kpi_fecha_medicion').value = fechaHoyInput();
     document.getElementById('kpi_tendencia').value = 'igual';
 
     cerrarModalKpiProyecto();
@@ -632,6 +885,7 @@ async function actualizarKpiProyecto() {
         kpi_id: document.getElementById('editar_kpi_id').value,
         meta: document.getElementById('editar_kpi_meta').value,
         actual: document.getElementById('editar_kpi_actual').value,
+        fecha_medicion: document.getElementById('editar_kpi_fecha_medicion').value,
         tendencia: document.getElementById('editar_kpi_tendencia').value
     };
 

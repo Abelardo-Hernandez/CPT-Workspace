@@ -139,18 +139,21 @@ exports.obtenerResultadosKpi = async (req, res) => {
                 kr.proyecto_id,
                 p.nombre AS proyecto,
                 r.numero_reunion,
+                r.fecha_reunion,
                 k.nombre AS kpi,
                 k.unidad,
                 k.tipo_meta,
                 kr.meta,
                 kr.actual,
+                kr.fecha_medicion,
+                kr.fecha_registro,
                 kr.resultado,
                 kr.tendencia
             FROM kpi_resultados kr
             LEFT JOIN proyectos p ON p.id = kr.proyecto_id
             LEFT JOIN reuniones r ON r.id = kr.reunion_id
             INNER JOIN kpis k ON k.id = kr.kpi_id
-            ORDER BY COALESCE(p.nombre, ''), kr.id DESC
+            ORDER BY COALESCE(kr.fecha_medicion, r.fecha_reunion, DATE(kr.fecha_registro), '1000-01-01') DESC, kr.id DESC
         `);
 
         res.json(rows);
@@ -168,6 +171,7 @@ exports.crearResultadoKpi = async (req, res) => {
             kpi_id,
             meta,
             actual,
+            fecha_medicion,
             tendencia
         } = req.body;
 
@@ -213,16 +217,18 @@ exports.crearResultadoKpi = async (req, res) => {
                 kpi_id,
                 meta,
                 actual,
+                fecha_medicion,
                 resultado,
                 tendencia
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         `, [
             reunion_id || null,
             proyecto_id || null,
             kpi_id,
             meta,
             actual,
+            fecha_medicion || null,
             resultado,
             tendencia || 'igual'
         ]);
@@ -258,12 +264,17 @@ exports.obtenerResultadosPorProyecto = async (req, res) => {
                 k.tipo_meta,
                 kr.meta,
                 kr.actual,
+                kr.fecha_medicion,
+                kr.fecha_registro,
                 kr.resultado,
-                kr.tendencia
+                kr.tendencia,
+                kr.reunion_id,
+                r.fecha_reunion
             FROM kpi_resultados kr
             INNER JOIN kpis k ON k.id = kr.kpi_id
+            LEFT JOIN reuniones r ON r.id = kr.reunion_id
             WHERE kr.proyecto_id = ?
-            ORDER BY k.nombre
+            ORDER BY COALESCE(kr.fecha_medicion, r.fecha_reunion, DATE(kr.fecha_registro), '9999-12-31'), kr.id
         `, [proyectoId]);
 
         res.json(rows);
@@ -282,6 +293,7 @@ exports.actualizarResultadoKpi = async (req, res) => {
             kpi_id,
             meta,
             actual,
+            fecha_medicion,
             tendencia
         } = req.body;
 
@@ -324,6 +336,7 @@ exports.actualizarResultadoKpi = async (req, res) => {
                 kpi_id = ?,
                 meta = ?,
                 actual = ?,
+                fecha_medicion = ?,
                 resultado = ?,
                 tendencia = ?
             WHERE id = ?
@@ -331,6 +344,7 @@ exports.actualizarResultadoKpi = async (req, res) => {
             kpi_id,
             meta,
             actual,
+            fecha_medicion || null,
             resultado,
             tendencia || 'igual',
             id
@@ -392,12 +406,14 @@ exports.obtenerResultadosPorReunion = async (req, res) => {
                 k.tipo_meta,
                 kr.meta,
                 kr.actual,
+                kr.fecha_medicion,
+                kr.fecha_registro,
                 kr.resultado,
                 kr.tendencia
             FROM kpi_resultados kr
             INNER JOIN kpis k ON k.id = kr.kpi_id
             WHERE kr.reunion_id = ?
-            ORDER BY k.nombre
+            ORDER BY COALESCE(kr.fecha_medicion, DATE(kr.fecha_registro), '1000-01-01') DESC, kr.id DESC
         `, [reunionId]);
 
         res.json(rows);

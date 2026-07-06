@@ -54,6 +54,14 @@ function textoTendencia(tendencia) {
     return 'Igual';
 }
 
+function fechaHoyInput() {
+    return new Date().toISOString().slice(0, 10);
+}
+
+function fechaResultadoKpi(resultado) {
+    return resultado.fecha_medicion || resultado.fecha_reunion || resultado.fecha_registro || null;
+}
+
 async function cargarResultadosKpi() {
     const res = await fetch('/api/kpis/resultados', {
         headers: auth.headers()
@@ -71,6 +79,7 @@ async function cargarResultadosKpi() {
                 <td>${r.kpi}</td>
                 <td>${r.meta} ${r.unidad || ''}</td>
                 <td>${r.actual} ${r.unidad || ''}</td>
+                <td>${formatearFecha(fechaResultadoKpi(r))}</td>
                 <td>${badgeResultado(r.resultado)}</td>
                 <td>${textoTendencia(r.tendencia)}</td>
             </tr>
@@ -84,6 +93,7 @@ async function crearResultadoKpi() {
         kpi_id: document.getElementById('kpi_id').value,
         meta: document.getElementById('meta').value,
         actual: document.getElementById('actual').value,
+        fecha_medicion: document.getElementById('fecha_medicion').value,
         tendencia: document.getElementById('tendencia').value
     };
 
@@ -104,9 +114,12 @@ async function crearResultadoKpi() {
 
     document.getElementById('meta').value = '';
     document.getElementById('actual').value = '';
+    document.getElementById('fecha_medicion').value = fechaHoyInput();
 
     cargarResultadosKpi();
 }
+
+document.getElementById('fecha_medicion').value = fechaHoyInput();
 
 cargarProyectos();
 cargarKpis();
