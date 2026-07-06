@@ -2,8 +2,10 @@ auth.verificarSesion();
 
 const params = new URLSearchParams(window.location.search);
 const proyectoId = params.get('id');
+let proyectoCache = null;
 let accionesProyectoCache = [];
 let kpisProyectoCache = [];
+let timelineProyectoCache = [];
 let graficaKpisProyecto = null;
 
 if (!proyectoId) {
@@ -209,6 +211,7 @@ async function cargarProyecto() {
     });
 
     const p = await res.json();
+    proyectoCache = p;
 
     document.getElementById('nombreProyecto').textContent = p.nombre;
     document.getElementById('objetivoProyecto').textContent = p.objetivo || 'Detalle ejecutivo del proyecto';
@@ -942,6 +945,7 @@ async function cargarTimeline() {
     });
 
     const eventos = await res.json();
+    timelineProyectoCache = eventos;
 
     const contenedor = document.getElementById('timelineProyecto');
 
@@ -978,6 +982,178 @@ async function cargarTimeline() {
             </div>
         `;
     });
+}
+
+async function obtenerJsonExportacion(url) {
+    const res = await fetch(url, {
+        headers: auth.headers()
+    });
+
+    if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || 'No se pudo obtener informacion para exportar');
+    }
+
+    return res.json();
+}
+
+function textoPlanoHtml(valor) {
+    const div = document.createElement('div');
+    div.innerHTML = String(valor ?? '');
+    return div.textContent || div.innerText || '';
+}
+
+function escaparXml(valor) {
+    return String(valor ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
+}
+
+function nombreArchivoSeguro(valor) {
+    return String(valor || 'proyecto')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-zA-Z0-9_-]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 60) || 'proyecto';
+}
+
+function celdaExcel(valor, estilo = '') {
+    const esNumero = typeof valor === 'number' && Number.isFinite(valor);
+    const tipo = esNumero ? 'Number' : 'String';
+    const contenido = esNumero ? valor : escaparXml(valor);
+    const estiloAttr = estilo ? ` ss:StyleID="${estilo}"` : '';
+
+    return `<Cell${estiloAttr}><Data ss:Type="${tipo}">${contenido}</Data></Cell>`;
+}
+
+function filaExcel(celdas, estilo = '') {
+    return `<Row>${celdas.map(celda => celdaExcel(celda, estilo)).join('')}</Row>`;
+}
+
+function hojaExcel(nombre, encabezados, filas) {
+    const columnas = encabezados
+        .map(() => '<Column ss:AutoFitWidth="1" ss:Width="150"/>')
+        .join('');
+
+    const filasXml = [
+        filaExcel(encabezados, 'Header'),
+        ...filas.map(fila => filaExcel(fila))
+    ].join('');
+
+    return `
+        <Worksheet ss:Name="${escaparXml(nombre)}">
+            <Table>
+                ${columnas}
+                ${filasXml}
+            </Table>
+        </Worksheet>
+    `;
+}
+
+function hojaResumenExcel(proyecto, acciones, kpis, eventos) {
+    const filas = [
+        ['Nombre', proyecto.nombre || '-'],
+        ['Objetivo', proyecto.objetivo || '-'],
+        ['Area', proyecto.area || '-'],
+        ['Responsable', proyecto.responsable || '-'],
+        ['Fecha inicio', formatearFecha(proyecto.fecha_inicio)],
+        ['Fecha objetivo', formatearFecha(proyecto.fecha_objetivo)],
+        ['Estatus', textoEstatus(proyecto.estatus)],
+        ['Ultima actualizacion', formatearFechaHora(proyecto.ultima_actualizacion)],
+        ['Avance actual', `${proyecto.avance || 0}%`],
+        ['Reuniones asociadas', proyecto.total_reuniones || 0],
+        ['Acciones registradas', acciones.length],
+        ['KPIs registrados', kpis.length],
+        ['Eventos en timeline', eventos.length],
+        ['Ultimo comentario', proyecto.ultimo_comentario || 'Sin comentarios']
+    ];
+
+    return hojaExcel('Resumen', ['Campo', 'Valor'], filas);
+}
+
+function construirLibroProyectoExcel(proyecto, acciones, kpis, eventos) {
+    const accionesFilas = acciones.map(accion => [
+        accion.descripcion || '-',
+        accion.numero_reunion ? `#${accion.numero_reunion}` : '-',
+        accion.responsable || '-',
+        formatearFecha(accion.fecha_compromiso),
+        textoPrioridad(accion.prioridad),
+        textoEstatus(accion.estatus)
+    ]);
+
+    const kpisFilas = kpis.map(kpi => [
+        kpi.kpi || '-',
+        `${kpi.meta ?? '-'} ${kpi.unidad || ''}`.trim(),
+        `${kpi.actual ?? '-'} ${kpi.unidad || ''}`.trim(),
+        formatearFecha(fechaKpi(kpi)),
+        textoEstatus(kpi.resultado),
+        textoTendencia(kpi.tendencia),
+        kpi.tipo_meta === 'menor_es_mejor' ? 'Menor es mejor' : 'Mayor es mejor'
+    ]);
+
+    const timelineFilas = eventos.map(evento => [
+        evento.tipo || '-',
+        evento.titulo || '-',
+        evento.estado || '-',
+        formatearFechaHora(evento.fecha),
+        textoPlanoHtml(evento.descripcion || '-')
+    ]);
+
+    return `<?xml version="1.0"?>
+        <?mso-application progid="Excel.Sheet"?>
+        <Workbook
+            xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+            xmlns:o="urn:schemas-microsoft-com:office:office"
+            xmlns:x="urn:schemas-microsoft-com:office:excel"
+            xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+            <Styles>
+                <Style ss:ID="Header">
+                    <Font ss:Bold="1" ss:Color="#FFFFFF"/>
+                    <Interior ss:Color="#198754" ss:Pattern="Solid"/>
+                </Style>
+            </Styles>
+            ${hojaResumenExcel(proyecto, acciones, kpis, eventos)}
+            ${hojaExcel('Acciones', ['Accion', 'Reunion', 'Responsable', 'Compromiso', 'Prioridad', 'Estatus'], accionesFilas)}
+            ${hojaExcel('KPIs', ['KPI', 'Meta', 'Actual', 'Fecha', 'Resultado', 'Tendencia', 'Tipo meta'], kpisFilas)}
+            ${hojaExcel('Timeline', ['Tipo', 'Titulo', 'Estado', 'Fecha', 'Descripcion'], timelineFilas)}
+        </Workbook>`;
+}
+
+async function exportarProyectoExcel() {
+    try {
+        const [proyecto, acciones, kpis, eventos] = await Promise.all([
+            obtenerJsonExportacion(`/api/proyectos/${proyectoId}`),
+            obtenerJsonExportacion(`/api/acciones/proyecto/${proyectoId}`),
+            obtenerJsonExportacion(`/api/kpis/resultados/proyecto/${proyectoId}`),
+            obtenerJsonExportacion(`/api/proyectos/${proyectoId}/timeline`)
+        ]);
+
+        proyectoCache = proyecto;
+        accionesProyectoCache = acciones;
+        kpisProyectoCache = kpis;
+        timelineProyectoCache = eventos;
+
+        const libro = construirLibroProyectoExcel(proyecto, acciones, kpis, eventos);
+        const blob = new Blob([libro], {
+            type: 'application/vnd.ms-excel;charset=utf-8'
+        });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        const fecha = fechaHoyInput();
+
+        link.href = url;
+        link.download = `${nombreArchivoSeguro(proyecto.nombre)}-${fecha}.xls`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+    } catch (error) {
+        alert(error.message || 'No se pudo exportar el proyecto');
+    }
 }
 
 document.addEventListener('keydown', event => {

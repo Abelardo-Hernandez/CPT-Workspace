@@ -108,6 +108,10 @@
                     <p><strong>Reuniones asociadas:</strong> <span id="totalReuniones">0</span></p>
                     <p><strong>Acciones registradas:</strong> <span id="totalAcciones">0</span></p>
                     <p><strong>Avance actual:</strong> <span id="avanceMini">0%</span></p>
+
+                    <button class="btn btn-outline-success fw-bold w-100 mt-2" type="button" onclick="exportarProyectoExcel()">
+                        <i class="bi bi-file-earmark-excel"></i> Exportar Excel
+                    </button>
                 </div>
             </div>
         </section>
@@ -137,7 +141,7 @@
                 data-tab="proyecto"
                 onclick="mostrarTabProyecto('proyecto')"
             >
-                <i class="bi bi-folder2-open"></i> Proyecto
+                <i class="bi bi-folder2-open"></i> KPIs
             </button>
         </section>
         <section class="ptc-card mt-4" data-project-tab-panel="acciones" style="display:none;">
