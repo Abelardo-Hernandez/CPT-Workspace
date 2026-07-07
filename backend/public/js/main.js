@@ -1,3 +1,168 @@
+const alertaNativa = window.alert.bind(window);
+
+function instalarEstilosAlertas() {
+    if (document.getElementById('ptcAlertStyles')) {
+        return;
+    }
+
+    const style = document.createElement('style');
+    style.id = 'ptcAlertStyles';
+    style.textContent = `
+        .ptc-alert-layer {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(15, 23, 42, 0.42);
+            backdrop-filter: blur(4px);
+        }
+
+        .ptc-alert-box {
+            width: min(420px, 100%);
+            border-radius: 18px;
+            background: #ffffff;
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            box-shadow: 0 24px 70px rgba(15, 23, 42, 0.28);
+            padding: 24px;
+            text-align: left;
+            animation: ptcAlertIn 0.18s ease-out;
+        }
+
+        .ptc-alert-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 14px;
+            color: #ffffff;
+            font-size: 24px;
+            background: linear-gradient(135deg, #198754, #2cbb78);
+        }
+
+        .ptc-alert-icon.warning {
+            background: linear-gradient(135deg, #f59e0b, #facc15);
+        }
+
+        .ptc-alert-title {
+            margin: 0 0 8px;
+            color: #0f172a;
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .ptc-alert-message {
+            margin: 0;
+            color: #475569;
+            font-size: 15px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+
+        .ptc-alert-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 22px;
+        }
+
+        .ptc-alert-actions .btn {
+            min-width: 104px;
+            font-weight: 700;
+        }
+
+        @keyframes ptcAlertIn {
+            from {
+                opacity: 0;
+                transform: translateY(14px) scale(0.98);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+    `;
+
+    document.head.appendChild(style);
+}
+
+function mostrarAlertaPersonalizada(mensaje, opciones = {}) {
+    if (!document.body) {
+        alertaNativa(mensaje);
+        return Promise.resolve(true);
+    }
+
+    instalarEstilosAlertas();
+
+    const esConfirmacion = opciones.confirmar === true;
+    const layer = document.createElement('div');
+    const icono = esConfirmacion ? 'bi-question-lg' : 'bi-check2';
+    const titulo = opciones.titulo || (esConfirmacion ? 'Confirmar acción' : 'Listo');
+
+    layer.className = 'ptc-alert-layer';
+    layer.innerHTML = `
+        <section class="ptc-alert-box" role="dialog" aria-modal="true">
+            <div class="ptc-alert-icon ${esConfirmacion ? 'warning' : ''}">
+                <i class="bi ${icono}"></i>
+            </div>
+            <h3 class="ptc-alert-title"></h3>
+            <p class="ptc-alert-message"></p>
+            <div class="ptc-alert-actions">
+                ${esConfirmacion ? '<button class="btn btn-light" type="button" data-alert-cancel>Cancelar</button>' : ''}
+                <button class="btn btn-primary" type="button" data-alert-ok>
+                    ${esConfirmacion ? 'Confirmar' : 'Entendido'}
+                </button>
+            </div>
+        </section>
+    `;
+
+    layer.querySelector('.ptc-alert-title').textContent = titulo;
+    layer.querySelector('.ptc-alert-message').textContent = mensaje || '';
+    document.body.appendChild(layer);
+
+    const ok = layer.querySelector('[data-alert-ok]');
+    const cancel = layer.querySelector('[data-alert-cancel]');
+
+    return new Promise(resolve => {
+        function cerrar(valor) {
+            document.removeEventListener('keydown', manejarTecla);
+            layer.remove();
+            resolve(valor);
+        }
+
+        function manejarTecla(event) {
+            if (event.key === 'Escape') {
+                cerrar(false);
+            }
+        }
+
+        ok.addEventListener('click', () => cerrar(true));
+        cancel?.addEventListener('click', () => cerrar(false));
+        document.addEventListener('keydown', manejarTecla);
+        ok.focus();
+    });
+}
+
+function notificar(mensaje, opciones = {}) {
+    return mostrarAlertaPersonalizada(mensaje, opciones);
+}
+
+function confirmar(mensaje, opciones = {}) {
+    return mostrarAlertaPersonalizada(mensaje, {
+        ...opciones,
+        confirmar: true
+    });
+}
+
+window.alert = mensaje => {
+    notificar(mensaje);
+};
+
 function logout() {
     if (typeof auth !== 'undefined') {
         auth.logout();
@@ -294,10 +459,57 @@ function actualizarFechaActual() {
     });
 }
 
+function cerrarMenuMovil() {
+    document.body.classList.remove('mobile-menu-open');
+    document.getElementById('mobileMenuToggle')?.setAttribute('aria-expanded', 'false');
+}
+
+function alternarMenuMovil() {
+    const abierto = document.body.classList.toggle('mobile-menu-open');
+    document.getElementById('mobileMenuToggle')?.setAttribute('aria-expanded', abierto ? 'true' : 'false');
+}
+
+function inicializarMenuMovil() {
+    const sidebar = document.querySelector('.sidebar');
+
+    if (!sidebar || document.getElementById('mobileMenuToggle')) {
+        return;
+    }
+
+    const boton = document.createElement('button');
+    boton.id = 'mobileMenuToggle';
+    boton.className = 'mobile-menu-toggle';
+    boton.type = 'button';
+    boton.setAttribute('aria-label', 'Abrir menu de navegacion');
+    boton.setAttribute('aria-expanded', 'false');
+    boton.innerHTML = '<i class="bi bi-list"></i>';
+
+    const backdrop = document.createElement('div');
+    backdrop.className = 'mobile-menu-backdrop';
+    backdrop.setAttribute('aria-hidden', 'true');
+
+    document.body.appendChild(backdrop);
+    document.body.appendChild(boton);
+
+    boton.addEventListener('click', alternarMenuMovil);
+    backdrop.addEventListener('click', cerrarMenuMovil);
+
+    sidebar.querySelectorAll('a[href]').forEach(link => {
+        link.addEventListener('click', cerrarMenuMovil);
+    });
+
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape') {
+            cerrarMenuMovil();
+        }
+    });
+}
+
 function inicializarMenu() {
     aplicarPermisosMenu();
     marcarMenuActivo();
     actualizarFechaActual();
+    inicializarMenuMovil();
 }
 
 if (document.readyState === 'loading') {

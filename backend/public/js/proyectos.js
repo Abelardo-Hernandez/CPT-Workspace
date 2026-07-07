@@ -273,7 +273,7 @@ async function eliminarProyecto() {
     const id = document.getElementById('editar_id').value;
     const nombre = document.getElementById('editar_nombre').value;
 
-    const confirmado = confirm(`Eliminar el proyecto "${nombre}"? Esta accion no se puede deshacer desde esta pantalla.`);
+    const confirmado = await confirmar(`Eliminar el proyecto "${nombre}"? Esta accion no se puede deshacer desde esta pantalla.`);
 
     if (!confirmado) {
         return;

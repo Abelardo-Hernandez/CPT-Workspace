@@ -818,7 +818,7 @@ async function eliminarAccionProyecto() {
     const id = document.getElementById('editar_accion_id').value;
     const descripcion = document.getElementById('editar_descripcion').value || 'esta accion';
 
-    const confirmado = confirm(`Eliminar "${descripcion}"? Esta accion no se puede deshacer desde esta pantalla.`);
+    const confirmado = await confirmar(`Eliminar "${descripcion}"? Esta accion no se puede deshacer desde esta pantalla.`);
 
     if (!confirmado) {
         return;
@@ -941,7 +941,7 @@ async function actualizarKpiProyecto() {
 
 async function eliminarKpiProyecto() {
     const id = document.getElementById('editar_kpi_resultado_id').value;
-    const confirmado = confirm('Eliminar esta medicion del KPI? Si existen mediciones anteriores, volveran a mostrarse como valor actual.');
+    const confirmado = await confirmar('Eliminar esta medicion del KPI? Si existen mediciones anteriores, volveran a mostrarse como valor actual.');
 
     if (!confirmado) {
         return;

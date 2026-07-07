@@ -225,9 +225,9 @@ async function cargarVistaTV() {
         });
 }
 
-function salirTV(){
+async function salirTV(){
 
-    if(confirm('¿Salir de la Vista TV?')){
+    if(await confirmar('¿Salir de la Vista TV?')){
 
         window.location.href='dashboard.html';
 

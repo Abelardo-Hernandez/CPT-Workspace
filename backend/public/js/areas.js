@@ -77,7 +77,7 @@ async function crearArea() {
 }
 
 async function eliminarArea(id, nombre) {
-    const confirmado = confirm(`Eliminar el area "${nombre}"?`);
+    const confirmado = await confirmar(`Eliminar el area "${nombre}"?`);
 
     if (!confirmado) {
         return;

@@ -10,8 +10,8 @@ exports.obtenerUsuarios = async (req, res) => {
             });
         }
 
+        const filtros = ['u.activo = 1'];
         const params = [];
-        let filtroArea = '';
 
         if (req.user.rol === 'colaborador') {
             const [[usuario]] = await pool.query(
@@ -23,9 +23,11 @@ exports.obtenerUsuarios = async (req, res) => {
                 return res.json([]);
             }
 
-            filtroArea = 'WHERE u.area_id = ?';
+            filtros.push('u.area_id = ?');
             params.push(usuario.area_id);
         }
+
+        const where = `WHERE ${filtros.join(' AND ')}`;
 
         const [rows] = await pool.query(`
             SELECT
@@ -38,7 +40,7 @@ exports.obtenerUsuarios = async (req, res) => {
                 u.activo
             FROM usuarios u
             LEFT JOIN areas a ON a.id = u.area_id
-            ${filtroArea}
+            ${where}
             ORDER BY u.nombre
         `, params);
 
@@ -195,10 +197,16 @@ exports.eliminarUsuario = async (req, res) => {
             });
         }
 
-        await pool.query(
-            'UPDATE usuarios SET activo = 0 WHERE id = ?',
+        const [resultado] = await pool.query(
+            'UPDATE usuarios SET activo = 0 WHERE id = ? AND activo = 1',
             [id]
         );
+
+        if (resultado.affectedRows === 0) {
+            return res.status(404).json({
+                message: 'Usuario no encontrado'
+            });
+        }
 
         res.json({
             message: 'Usuario eliminado'

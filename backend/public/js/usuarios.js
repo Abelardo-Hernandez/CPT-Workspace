@@ -198,7 +198,7 @@ async function eliminarUsuario() {
     const id = document.getElementById('editar_id').value;
     const nombre = document.getElementById('editar_nombre').value;
 
-    const confirmado = confirm(`Eliminar el usuario "${nombre}"? El usuario quedara inactivo.`);
+    const confirmado = await confirmar(`Eliminar el usuario "${nombre}"? El usuario quedara inactivo.`);
 
     if (!confirmado) {
         return;

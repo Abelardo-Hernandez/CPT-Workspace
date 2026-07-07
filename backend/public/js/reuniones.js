@@ -90,7 +90,7 @@ async function cargarReuniones() {
 }
 
 async function cancelarReunion(id, numeroReunion) {
-    const confirmado = confirm(`Cancelar la reunion #${numeroReunion}?`);
+    const confirmado = await confirmar(`Cancelar la reunion #${numeroReunion}?`);
 
     if (!confirmado) {
         return;

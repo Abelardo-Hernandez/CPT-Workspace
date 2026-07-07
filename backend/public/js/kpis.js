@@ -91,7 +91,7 @@ async function crearKpi() {
 }
 
 async function eliminarKpi(id, nombre) {
-    const confirmado = confirm(`Eliminar el KPI "${nombre}"?`);
+    const confirmado = await confirmar(`Eliminar el KPI "${nombre}"?`);
 
     if (!confirmado) {
         return;

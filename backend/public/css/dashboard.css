@@ -124,6 +124,11 @@ body{
     border-top:1px solid rgba(255,255,255,.1);
 }
 
+.mobile-menu-toggle,
+.mobile-menu-backdrop{
+    display:none;
+}
+
 .content{
     flex:1;
     padding:0 28px 32px;
@@ -435,17 +440,75 @@ canvas{
         overflow-x:hidden;
     }
 
+    body.mobile-menu-open{
+        overflow:hidden;
+    }
+
     .layout{
-        flex-direction:column;
+        display:block;
+    }
+
+    body .ptc-layout{
+        display:block;
     }
 
     .sidebar{
-        width:100%;
-        min-width:100%;
-        height:auto;
-        position:relative;
-        padding:14px 12px;
-        gap:0;
+        position:fixed;
+        top:0;
+        left:0;
+        z-index:1045;
+        width:min(300px,86vw);
+        min-width:0;
+        height:100vh;
+        padding:20px 16px;
+        overflow-y:auto;
+        transform:translateX(-105%);
+        transition:transform .24s ease;
+        box-shadow:20px 0 60px rgba(15,23,42,.32);
+    }
+
+    body.mobile-menu-open .sidebar{
+        transform:translateX(0);
+    }
+
+    .mobile-menu-toggle{
+        position:fixed;
+        right:18px;
+        bottom:18px;
+        z-index:1055;
+        width:56px;
+        height:56px;
+        border:0;
+        border-radius:50%;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        color:white;
+        background:linear-gradient(135deg,#198754,#2563eb);
+        box-shadow:0 16px 34px rgba(15,23,42,.28);
+        font-size:24px;
+    }
+
+    .mobile-menu-toggle:focus-visible{
+        outline:3px solid rgba(37,99,235,.35);
+        outline-offset:3px;
+    }
+
+    .mobile-menu-backdrop{
+        position:fixed;
+        inset:0;
+        z-index:1040;
+        display:block;
+        pointer-events:none;
+        opacity:0;
+        background:rgba(15,23,42,.48);
+        backdrop-filter:blur(3px);
+        transition:opacity .2s ease;
+    }
+
+    body.mobile-menu-open .mobile-menu-backdrop{
+        pointer-events:auto;
+        opacity:1;
     }
 
     .brand{
@@ -475,8 +538,29 @@ canvas{
         border-radius:10px;
     }
 
+    .sidebar a:hover,
+    .sidebar a.active{
+        transform:none;
+    }
+
     .content{
         padding:0 16px 24px;
+    }
+
+    body .ptc-content{
+        padding:16px;
+    }
+
+    body .ptc-page-header{
+        border-radius:16px;
+        padding:18px;
+        align-items:flex-start;
+        flex-direction:column;
+        gap:12px;
+    }
+
+    body .ptc-page-header h1{
+        font-size:26px;
     }
 
     .topbar{
@@ -587,19 +671,14 @@ canvas{
 }
 
 @media(max-width:520px){
-    .sidebar{
-        display:block;
-    }
-
     .sidebar .menu-title{
         margin-top:6px;
     }
 
     .sidebar a{
-        display:inline-flex;
-        width:auto;
-        margin-right:6px;
-        vertical-align:top;
+        display:flex;
+        width:100%;
+        margin-right:0;
     }
 
     .sidebar .logout{
