@@ -298,7 +298,7 @@ exports.actualizarResultadoKpi = async (req, res) => {
         } = req.body;
 
         const [[registro]] = await pool.query(
-            'SELECT id, proyecto_id FROM kpi_resultados WHERE id = ?',
+            'SELECT id, reunion_id, proyecto_id FROM kpi_resultados WHERE id = ?',
             [id]
         );
 
@@ -331,26 +331,30 @@ exports.actualizarResultadoKpi = async (req, res) => {
         const resultado = calcularResultado(tipoMeta, meta, actual);
 
         await pool.query(`
-            UPDATE kpi_resultados
-            SET
-                kpi_id = ?,
-                meta = ?,
-                actual = ?,
-                fecha_medicion = ?,
-                resultado = ?,
-                tendencia = ?
-            WHERE id = ?
+            INSERT INTO kpi_resultados
+            (
+                reunion_id,
+                proyecto_id,
+                kpi_id,
+                meta,
+                actual,
+                fecha_medicion,
+                resultado,
+                tendencia
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         `, [
+            registro.reunion_id || null,
+            registro.proyecto_id || null,
             kpi_id,
             meta,
             actual,
             fecha_medicion || null,
             resultado,
-            tendencia || 'igual',
-            id
+            tendencia || 'igual'
         ]);
 
-        res.json({ message: 'Resultado KPI actualizado' });
+        res.json({ message: 'Nueva medicion KPI registrada' });
     } catch (error) {
         console.error(error);
         res.status(500).json({

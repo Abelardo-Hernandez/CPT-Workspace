@@ -6,6 +6,16 @@ const controller = require('../controllers/kpis.controller');
 const verificarToken = require('../middleware/verificarToken');
 const verificarAdmin = require('../middleware/verificarAdmin');
 
+function verificarAdminOColaborador(req, res, next) {
+    if (!['administrador', 'colaborador'].includes(req.user.rol)) {
+        return res.status(403).json({
+            message: 'No autorizado'
+        });
+    }
+
+    next();
+}
+
 router.get(
     '/',
     verificarToken,
@@ -15,7 +25,7 @@ router.get(
 router.post(
     '/',
     verificarToken,
-    verificarAdmin,
+    verificarAdminOColaborador,
     controller.crearKpi
 );
 

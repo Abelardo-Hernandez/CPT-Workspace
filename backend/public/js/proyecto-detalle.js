@@ -171,7 +171,7 @@ function abrirModalEditarKpiProyecto(id) {
     document.getElementById('editar_kpi_id').value = registro.kpi_id || '';
     document.getElementById('editar_kpi_meta').value = registro.meta ?? '';
     document.getElementById('editar_kpi_actual').value = registro.actual ?? '';
-    document.getElementById('editar_kpi_fecha_medicion').value = valorFechaInput(fechaKpi(registro));
+    document.getElementById('editar_kpi_fecha_medicion').value = fechaHoyInput();
     document.getElementById('editar_kpi_tendencia').value = registro.tendencia || 'igual';
 
     const modal = document.getElementById('modalEditarKpiProyecto');
@@ -398,6 +398,29 @@ function badgeResultadoKpi(resultado) {
     );
 }
 
+function ultimosKpisPorIndicador(kpis) {
+    const ordenados = [...kpis].sort((a, b) => {
+        const fechaB = timestampKpi(b) || 0;
+        const fechaA = timestampKpi(a) || 0;
+
+        return fechaB - fechaA || Number(b.id || 0) - Number(a.id || 0);
+    });
+
+    const ultimos = new Map();
+
+    ordenados.forEach(kpi => {
+        const clave = kpi.kpi_id || kpi.kpi || kpi.id;
+
+        if (!ultimos.has(clave)) {
+            ultimos.set(clave, kpi);
+        }
+    });
+
+    return [...ultimos.values()].sort((a, b) =>
+        String(a.kpi || '').localeCompare(String(b.kpi || ''), 'es')
+    );
+}
+
 function porcentajeKpi(kpi) {
     const meta = Number(kpi.meta);
     const actual = Number(kpi.actual);
@@ -545,7 +568,10 @@ function renderGraficaKpisProyecto(kpis) {
             pointBorderWidth: 2,
             pointRadius: 6,
             pointHoverRadius: 8,
-            showLine: false
+            borderWidth: 1.8,
+            tension: 0.25,
+            fill: false,
+            showLine: true
         };
     });
 
@@ -647,7 +673,9 @@ async function cargarKpisProyecto() {
     const tabla = document.getElementById('tablaKpisProyecto');
     tabla.innerHTML = '';
 
-    if (!kpis.length) {
+    const ultimosKpis = ultimosKpisPorIndicador(kpis);
+
+    if (!ultimosKpis.length) {
         tabla.innerHTML = `
             <tr>
                 <td colspan="7">
@@ -660,12 +688,14 @@ async function cargarKpisProyecto() {
         return;
     }
 
-    kpis.forEach(k => {
+    ultimosKpis.forEach(k => {
         tabla.innerHTML += `
             <tr>
                 <td>
                     <strong>${k.kpi}</strong>
-                    <div class="text-muted small">${k.tipo_meta === 'menor_es_mejor' ? 'Menor es mejor' : 'Mayor es mejor'}</div>
+                    <div class="text-muted small">
+                        ${k.tipo_meta === 'menor_es_mejor' ? 'Menor es mejor' : 'Mayor es mejor'}
+                    </div>
                 </td>
                 <td>${k.meta} ${k.unidad || ''}</td>
                 <td>${k.actual} ${k.unidad || ''}</td>
@@ -677,8 +707,8 @@ async function cargarKpisProyecto() {
                         class="btn btn-outline-primary btn-sm"
                         type="button"
                         onclick="abrirModalEditarKpiProyecto(${k.id})">
-                        <i class="bi bi-pencil-square"></i>
-                        Editar
+                        <i class="bi bi-graph-up-arrow"></i>
+                        Medir
                     </button>
                 </td>
             </tr>
@@ -911,7 +941,7 @@ async function actualizarKpiProyecto() {
 
 async function eliminarKpiProyecto() {
     const id = document.getElementById('editar_kpi_resultado_id').value;
-    const confirmado = confirm('Eliminar este KPI del proyecto?');
+    const confirmado = confirm('Eliminar esta medicion del KPI? Si existen mediciones anteriores, volveran a mostrarse como valor actual.');
 
     if (!confirmado) {
         return;
@@ -1054,7 +1084,7 @@ function hojaExcel(nombre, encabezados, filas) {
     `;
 }
 
-function hojaResumenExcel(proyecto, acciones, kpis, eventos) {
+function hojaResumenExcel(proyecto, acciones, kpisActuales, kpisHistorial, eventos) {
     const filas = [
         ['Nombre', proyecto.nombre || '-'],
         ['Objetivo', proyecto.objetivo || '-'],
@@ -1067,7 +1097,8 @@ function hojaResumenExcel(proyecto, acciones, kpis, eventos) {
         ['Avance actual', `${proyecto.avance || 0}%`],
         ['Reuniones asociadas', proyecto.total_reuniones || 0],
         ['Acciones registradas', acciones.length],
-        ['KPIs registrados', kpis.length],
+        ['KPIs actuales', kpisActuales.length],
+        ['Mediciones KPI historicas', kpisHistorial.length],
         ['Eventos en timeline', eventos.length],
         ['Ultimo comentario', proyecto.ultimo_comentario || 'Sin comentarios']
     ];
@@ -1076,6 +1107,18 @@ function hojaResumenExcel(proyecto, acciones, kpis, eventos) {
 }
 
 function construirLibroProyectoExcel(proyecto, acciones, kpis, eventos) {
+    const kpisActuales = ultimosKpisPorIndicador(kpis);
+    const kpisHistorial = [...kpis].sort((a, b) => {
+        const nombre = String(a.kpi || '').localeCompare(String(b.kpi || ''), 'es');
+
+        if (nombre !== 0) {
+            return nombre;
+        }
+
+        return (timestampKpi(a) || 0) - (timestampKpi(b) || 0) ||
+            Number(a.id || 0) - Number(b.id || 0);
+    });
+
     const accionesFilas = acciones.map(accion => [
         accion.descripcion || '-',
         accion.numero_reunion ? `#${accion.numero_reunion}` : '-',
@@ -1085,11 +1128,21 @@ function construirLibroProyectoExcel(proyecto, acciones, kpis, eventos) {
         textoEstatus(accion.estatus)
     ]);
 
-    const kpisFilas = kpis.map(kpi => [
+    const kpisActualesFilas = kpisActuales.map(kpi => [
         kpi.kpi || '-',
         `${kpi.meta ?? '-'} ${kpi.unidad || ''}`.trim(),
         `${kpi.actual ?? '-'} ${kpi.unidad || ''}`.trim(),
         formatearFecha(fechaKpi(kpi)),
+        textoEstatus(kpi.resultado),
+        textoTendencia(kpi.tendencia),
+        kpi.tipo_meta === 'menor_es_mejor' ? 'Menor es mejor' : 'Mayor es mejor'
+    ]);
+
+    const kpisHistorialFilas = kpisHistorial.map(kpi => [
+        kpi.kpi || '-',
+        formatearFecha(fechaKpi(kpi)),
+        `${kpi.meta ?? '-'} ${kpi.unidad || ''}`.trim(),
+        `${kpi.actual ?? '-'} ${kpi.unidad || ''}`.trim(),
         textoEstatus(kpi.resultado),
         textoTendencia(kpi.tendencia),
         kpi.tipo_meta === 'menor_es_mejor' ? 'Menor es mejor' : 'Mayor es mejor'
@@ -1116,9 +1169,10 @@ function construirLibroProyectoExcel(proyecto, acciones, kpis, eventos) {
                     <Interior ss:Color="#198754" ss:Pattern="Solid"/>
                 </Style>
             </Styles>
-            ${hojaResumenExcel(proyecto, acciones, kpis, eventos)}
+            ${hojaResumenExcel(proyecto, acciones, kpisActuales, kpisHistorial, eventos)}
             ${hojaExcel('Acciones', ['Accion', 'Reunion', 'Responsable', 'Compromiso', 'Prioridad', 'Estatus'], accionesFilas)}
-            ${hojaExcel('KPIs', ['KPI', 'Meta', 'Actual', 'Fecha', 'Resultado', 'Tendencia', 'Tipo meta'], kpisFilas)}
+            ${hojaExcel('KPIs actuales', ['KPI', 'Meta', 'Actual', 'Ultima fecha', 'Resultado', 'Tendencia', 'Tipo meta'], kpisActualesFilas)}
+            ${hojaExcel('Historial KPI', ['KPI', 'Fecha', 'Meta', 'Actual', 'Resultado', 'Tendencia', 'Tipo meta'], kpisHistorialFilas)}
             ${hojaExcel('Timeline', ['Tipo', 'Titulo', 'Estado', 'Fecha', 'Descripcion'], timelineFilas)}
         </Workbook>`;
 }
