@@ -464,9 +464,42 @@ function cerrarMenuMovil() {
     document.getElementById('mobileMenuToggle')?.setAttribute('aria-expanded', 'false');
 }
 
+function menuMovilActivo() {
+    return window.matchMedia('(max-width: 768px)').matches;
+}
+
 function alternarMenuMovil() {
     const abierto = document.body.classList.toggle('mobile-menu-open');
     document.getElementById('mobileMenuToggle')?.setAttribute('aria-expanded', abierto ? 'true' : 'false');
+}
+
+function navegarDespuesDeCerrarMenu(event, link) {
+    if (
+        !menuMovilActivo() ||
+        !document.body.classList.contains('mobile-menu-open') ||
+        event.defaultPrevented ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey ||
+        link.target === '_blank'
+    ) {
+        return;
+    }
+
+    const href = link.getAttribute('href') || '';
+
+    if (!href || href === '#' || href.startsWith('javascript:')) {
+        cerrarMenuMovil();
+        return;
+    }
+
+    event.preventDefault();
+    cerrarMenuMovil();
+
+    window.setTimeout(() => {
+        window.location.href = link.href;
+    }, 230);
 }
 
 function inicializarMenuMovil() {
@@ -495,7 +528,7 @@ function inicializarMenuMovil() {
     backdrop.addEventListener('click', cerrarMenuMovil);
 
     sidebar.querySelectorAll('a[href]').forEach(link => {
-        link.addEventListener('click', cerrarMenuMovil);
+        link.addEventListener('click', event => navegarDespuesDeCerrarMenu(event, link));
     });
 
     document.addEventListener('keydown', event => {
@@ -505,11 +538,46 @@ function inicializarMenuMovil() {
     });
 }
 
+function desactivarSugerenciasFormularios(contenedor = document) {
+    contenedor.querySelectorAll('form').forEach(form => {
+        form.setAttribute('autocomplete', 'off');
+    });
+
+    contenedor.querySelectorAll('input, textarea, select').forEach(campo => {
+        campo.setAttribute('autocomplete', 'off');
+        campo.setAttribute('autocorrect', 'off');
+        campo.setAttribute('autocapitalize', 'off');
+        campo.setAttribute('spellcheck', 'false');
+        campo.setAttribute('data-lpignore', 'true');
+        campo.setAttribute('data-1p-ignore', 'true');
+        campo.setAttribute('data-bwignore', 'true');
+    });
+}
+
+function observarCamposDinamicos() {
+    const observer = new MutationObserver(mutations => {
+        mutations.forEach(mutation => {
+            mutation.addedNodes.forEach(node => {
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                    desactivarSugerenciasFormularios(node);
+                }
+            });
+        });
+    });
+
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+}
+
 function inicializarMenu() {
     aplicarPermisosMenu();
     marcarMenuActivo();
     actualizarFechaActual();
     inicializarMenuMovil();
+    desactivarSugerenciasFormularios();
+    observarCamposDinamicos();
 }
 
 if (document.readyState === 'loading') {
